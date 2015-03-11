@@ -55,6 +55,10 @@ module Thor::Aws
     end
   end
 
+  def instance_variable_get_or_set(name, object)
+    instance_variable_get(name) or instance_variable_set(name, object)
+  end
+
   {
     autoscaling:          Aws::AutoScaling::Resource,
     cloudformation:       Aws::CloudFormation::Resource,
@@ -101,7 +105,7 @@ module Thor::Aws
     swf:                  Aws::SWF::Resource,
   }.each do |name, klass|
     define_method name do
-      klass.new aws_configuration
+      instance_variable_get_or_set :"@#{name}", klass.new(aws_configuration)
     end
   end
 end
