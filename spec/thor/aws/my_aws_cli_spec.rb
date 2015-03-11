@@ -1,58 +1,12 @@
-require "thor"
-require "thor/aws/version"
-require "aws-sdk"
+require_relative "my_aws_cli"
 
-module Thor::Aws
-  DEFAULT_REGION         = "us-east-1"
-  DEFAULT_REGION_TIMEOUT = 3
-
-  def self.included klass
-    klass.class_eval do
-      class_option(:profile,
-        desc:    "Load credentials by profile name from shared credentials file (~/.aws/credentials).",
-        aliases: [:p],
-      )
-
-      class_option(:access_key_id,
-        desc:    "AWS access key id.",
-        aliases: [:k],
-      )
-
-      class_option(:secret_access_key,
-        desc:    "AWS secret access key.",
-        aliases: [:s],
-      )
-
-      class_option(:region,
-        desc:    "AWS region.",
-        aliases: [:r],
-      )
-    end
+describe MyAwsCLI do
+  it "is a instance of the class which has a superclass Thor" do
+    expect(subject.class.superclass).to be Thor
   end
 
-  private
-
-  def aws_configuration
-    hash = {}
-
-    [:profile, :access_key_id, :secret_access_key, :region].each do |option|
-      hash.update(option => options[option]) if options[option]
-    end
-
-    hash.update(region: own_region) if hash[:region].nil? && ENV["AWS_REGION"].nil?
-    hash
-  end
-
-  def own_region
-    @own_region ||= begin
-      require "net/http"
-
-      timeout DEFAULT_REGION_TIMEOUT do
-        Net::HTTP.get("169.254.169.254", "/latest/meta-data/placement/availability-zone").chop
-      end
-    rescue
-      DEFAULT_REGION
-    end
+  it "is a instance of the class including Thor::Aws" do
+    expect(subject.class.included_modules).to include Thor::Aws
   end
 
   {
@@ -61,7 +15,7 @@ module Thor::Aws
     cloudfront:           Aws::CloudFront::Resource,
     cloudhsm:             Aws::CloudHSM::Resource,
     cloudsearch:          Aws::CloudSearch::Resource,
-    # cloudsearchdomain:    Aws::CloudSearchDomain::Resource, # Pending 'cause '`missing required option :endpoint`
+    # cloudsearchdomain:    Aws::CloudSearchDomain::Resource,
     cloudtrail:           Aws::CloudTrail::Resource,
     cloudwatch:           Aws::CloudWatch::Resource,
     cloudwatchlogs:       Aws::CloudWatchLogs::Resource,
@@ -100,8 +54,19 @@ module Thor::Aws
     support:              Aws::Support::Resource,
     swf:                  Aws::SWF::Resource,
   }.each do |name, klass|
-    define_method name do
-      klass.new aws_configuration
+    it "has private method ##{name} that returns #{klass} instance" do
+      expect(subject.send name).to be_a klass
     end
+  end
+
+  context "when invoked from shell" do
+    subject do
+      MyAwsCLI.new.help
+    end
+
+    it {expect {subject}.to output(/--access-key-id/).to_stdout}
+    it {expect {subject}.to output(/--secret-access-key/).to_stdout}
+    it {expect {subject}.to output(/--region/).to_stdout}
+    it {expect {subject}.to output(/--profile/).to_stdout}
   end
 end
