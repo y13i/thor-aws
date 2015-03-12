@@ -1,5 +1,7 @@
 # Thor::Aws
 
+[![Gem Version](https://img.shields.io/gem/v/thor-aws.svg)](http://rubygems.org/gems/thor-aws) [![Build Status](https://travis-ci.org/y13i/thor-aws.svg)](https://travis-ci.org/y13i/thor-aws)
+
 Thor extension for building CLI to deal with AWS.
 
 ## Installation
@@ -43,6 +45,17 @@ class MyAwsCLI < Thor
     p ec2.instances.to_a
   end
 end
+```
+
+## Changelog
+
+**0.0.3**: Add `--shared-credentials-path` option.
+
+## Testing
+
+```
+bundle install --path vendor/bundle
+bundle exec rake spec
 ```
 
 ## Contributing
