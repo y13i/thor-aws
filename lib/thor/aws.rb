@@ -47,7 +47,7 @@ module Thor::Aws
 
     @aws_configuration.update(region: own_region) if @aws_configuration[:region].nil? && ENV["AWS_REGION"].nil?
 
-    if [option.shared_credentials_path, option.profile].any?
+    if [options.shared_credentials_path, options.profile].any?
       credentials = Aws::SharedCredentials.new path: options.shared_credentials_path, profile_name: options.profile
       @aws_configuration.update credentials: credentials
     end
