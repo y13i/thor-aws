@@ -9,7 +9,7 @@ module Thor::Aws
   def self.included klass
     klass.class_eval do
       class_option(:profile,
-        desc:    "Load credentials by profile name from shared credentials file (~/.aws/credentials).",
+        desc:    "Load credentials by profile name from shared credentials file.",
         aliases: [:p],
       )
 
@@ -27,20 +27,32 @@ module Thor::Aws
         desc:    "AWS region.",
         aliases: [:r],
       )
+
+      class_option(:shared_credentials_path,
+        desc: "AWS shared credentials path.",
+      )
     end
   end
 
   private
 
   def aws_configuration
-    hash = {}
+    return @aws_configuration if @aws_configuration
 
-    [:profile, :access_key_id, :secret_access_key, :region].each do |option|
-      hash.update(option => options[option]) if options[option]
+    @aws_configuration = {}
+
+    [:access_key_id, :secret_access_key, :region].each do |option|
+      @aws_configuration.update(option => options[option]) if options[option]
     end
 
-    hash.update(region: own_region) if hash[:region].nil? && ENV["AWS_REGION"].nil?
-    hash
+    @aws_configuration.update(region: own_region) if @aws_configuration[:region].nil? && ENV["AWS_REGION"].nil?
+
+    if [:profile, :shared_credentials_path].any?
+      credentials = Aws::SharedCredentials.new path: options.shared_credentials_path, profile_name: options.profile
+      @aws_configuration.update credentials: credentials
+    end
+
+    @aws_configuration
   end
 
   def own_region

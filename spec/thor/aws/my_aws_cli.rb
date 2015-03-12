@@ -9,4 +9,16 @@ class MyAwsCLI < Thor
   def list
     p ec2.instances.to_a
   end
+
+  desc :showkey, "Show access key ID for testing"
+
+  def showkey
+    p ec2.client.config.credentials.access_key_id
+  end
+
+  desc :showregion, "Show region for testing"
+
+  def showregion
+    p ec2.client.config.region
+  end
 end

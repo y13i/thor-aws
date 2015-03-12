@@ -68,5 +68,30 @@ describe MyAwsCLI do
     it {expect {subject}.to output(/--secret-access-key/).to_stdout}
     it {expect {subject}.to output(/--region/).to_stdout}
     it {expect {subject}.to output(/--profile/).to_stdout}
+    it {expect {subject}.to output(/--shared-credentials-path/).to_stdout}
+  end
+
+  context "when invoked #showregion from shell with `--region` option" do
+    subject do
+      MyAwsCLI.new.invoke :showregion, [], {region: "ap-northeast-1"}
+    end
+
+    it {expect {subject}.to output(%("ap-northeast-1"\n)).to_stdout}
+  end
+
+  context "when invoked #showkey from shell with `--shared-credentials-path` option" do
+    subject do
+      MyAwsCLI.new.invoke :showkey, [], {shared_credentials_path: "#{__dir__}/my_credentials"}
+    end
+
+    it {expect {subject}.to output(%("MYAWESOMEDEFAULTACCESSKEY"\n)).to_stdout}
+  end
+
+  context "when invoked #showkey from shell with `--shared-credentials-path` and `--profile` option" do
+    subject do
+      MyAwsCLI.new.invoke :showkey, [], {shared_credentials_path: "#{__dir__}/my_credentials", profile: "alternate"}
+    end
+
+    it {expect {subject}.to output(%("MYAWESOMEALTERNATEACCESSKEY"\n)).to_stdout}
   end
 end
