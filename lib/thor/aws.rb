@@ -1,6 +1,7 @@
 require "thor"
 require "thor/aws/version"
 require "aws-sdk"
+require "timeout"
 
 module Thor::Aws
   DEFAULT_REGION         = "us-east-1"
@@ -59,7 +60,7 @@ module Thor::Aws
     @own_region ||= begin
       require "net/http"
 
-      timeout DEFAULT_REGION_TIMEOUT do
+      Timeout.timeout DEFAULT_REGION_TIMEOUT do
         Net::HTTP.get("169.254.169.254", "/latest/meta-data/placement/availability-zone").chop
       end
     rescue
