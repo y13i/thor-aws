@@ -112,7 +112,7 @@ module Thor::Aws
     sns:                  Aws::SNS::Resource,
     sqs:                  Aws::SQS::Resource,
     storagegateway:       Aws::StorageGateway::Resource,
-    sts:                  Aws::STS::Resource,
+    sts:                  Aws::STS::Client,
     support:              Aws::Support::Resource,
     swf:                  Aws::SWF::Resource,
   }.each do |name, klass|
